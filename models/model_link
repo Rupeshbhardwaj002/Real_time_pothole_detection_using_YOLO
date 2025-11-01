@@ -1,1 +1,8 @@
-
+#You can find the pretrained Yolo model on this link -> https://huggingface.co/spaces/rupesh002/pothole-detection/blob/main/best.pt or just run this file in collab cell 
+from huggingface_hub import hf_hub_download, login
+login("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")
+model = hf_hub_download 
+        (repo_id = "rupesh002/pothole_dataset_2",
+    repo_type = "model",
+    filename = "best.pt"
+)
