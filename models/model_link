@@ -1,3 +1,4 @@
+#Because the size of the model is big we cant upload it on github directly due to 25mb size limit of github.
 #You can find the pretrained Yolo model on this link -> https://huggingface.co/spaces/rupesh002/pothole-detection/blob/main/best.pt or just run this file in collab cell 
 from huggingface_hub import hf_hub_download, login
 login("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")
