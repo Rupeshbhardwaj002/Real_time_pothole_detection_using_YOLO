@@ -1,86 +1,106 @@
 
 # 🛣️ Real-Time Pothole Detection using YOLO
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![YOLOv8](https://img.shields.io/badge/YOLO-v8-orange.svg)](https://github.com/ultralytics/ultralytics)
-[![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green.svg)](https://opencv.org/)
+<div align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white" alt="PyTorch">
+  <img src="https://img.shields.io/badge/YOLOv8-Ultralytics-orange?style=for-the-badge" alt="YOLOv8">
+  <img src="https://img.shields.io/badge/OpenCV-5C3EE8.svg?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV">
+  <img src="https://img.shields.io/badge/License-MIT-success.svg?style=for-the-badge" alt="License">
+</div>
 
-> **A deep learning-based computer vision project that identifies potholes on the road in real-time.** 
-> These types of models can be integrated with today's smart vehicles and Advanced Driver Assistance Systems (ADAS) to prevent accidents, minimize vehicle damage, and significantly increase overall road safety.
+<br/>
+
+> **An advanced, deep learning-based computer vision system designed to detect and localize potholes on roads in real-time.** 
+> Seamlessly integrable with Advanced Driver Assistance Systems (ADAS) and smart city infrastructure to prevent accidents, minimize vehicle damage, and enhance overall road safety.
 
 ---
 
 ## 📑 Table of Contents
-- [Overview](#-overview)
-- [Architecture & Flow](#-architecture--flow)
-- [Features](#-features)
+- [Motivation](#-motivation)
+- [System Architecture](#-system-architecture)
+- [Key Features](#-key-features)
+- [Technology Stack](#-technology-stack)
 - [Prerequisites](#-prerequisites)
 - [Installation](#-installation)
-- [Usage](#-usage)
-- [Dataset & Training](#-dataset--training)
-- [Results](#-results)
-- [Future Scope](#-future-scope)
+- [Usage Guide](#-usage-guide)
+- [Project Structure](#-project-structure)
+- [Model Training & Evaluation](#-model-training--evaluation)
+- [Future Roadmap](#-future-roadmap)
 - [Contributing](#-contributing)
 - [License](#-license)
 
 ---
 
-## 📖 Overview
+## 🎯 Motivation
 
-Potholes are a major cause of road accidents and vehicle damage worldwide. This project leverages the state-of-the-art **YOLO (You Only Look Once)** object detection framework to detect potholes in real-time from video feeds or dashcam footage. By providing immediate visual feedback and bounding boxes around detected road hazards, this system serves as a foundational component for autonomous driving and smart city infrastructure monitoring.
+Poor road conditions and undetected potholes contribute to millions of dollars in vehicle damage and pose severe safety risks to drivers worldwide. Traditional road monitoring relies on manual inspection, which is slow, expensive, and inefficient. This project automates road hazard detection using state-of-the-art **YOLO (You Only Look Once)** object detection, enabling real-time alerts for drivers and automated reporting for municipal maintenance systems.
 
 ---
 
-## 🏗️ Architecture & Flow
+## 🏗️ System Architecture
 
-The following diagram illustrates the end-to-end pipeline of the pothole detection system:
+The following flowchart illustrates the complete pipeline, from data ingestion to real-time inference and alerting. The diagram is styled with a high-contrast dark theme for optimal visibility on GitHub.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f8fafc', 'primaryBorderColor': '#818cf8', 'lineColor': '#94a3b8', 'secondaryColor': '#334155', 'tertiaryColor': '#0f172a', 'clusterBkg': '#0f172a', 'clusterBorder': '#475569'}}}%%
 graph TD
-    A[Input Video / Camera Feed] --> B[Frame Extraction]
-    B --> C{Preprocessing}
-    C -->|Resize & Normalize| D[YOLO Object Detection Model]
-    
-    subgraph Model Architecture
-        D --> E[Feature Extraction Backbone]
-        E --> F[Neck Feature Aggregation]
-        F --> G[Head Bounding Box & Class Prediction]
+    subgraph Data Pipeline
+        A[Raw Video / Camera Feed] --> B[Frame Extraction]
+        B --> C[Image Preprocessing & Normalization]
     end
-    
-    G --> H{Post-Processing}
-    H -->|Non-Maximum Suppression| I[Filtered Bounding Boxes]
-    I --> J[Overlay Bounding Boxes on Frame]
-    J --> K[Output Video / Alert System]
-    
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style D fill:#bbf,stroke:#333,stroke-width:2px
-    style K fill:#bfb,stroke:#333,stroke-width:2px
+
+    subgraph YOLO Object Detection Model
+        C --> D[Backbone: Feature Extraction]
+        D --> E[Neck: Feature Aggregation]
+        E --> F[Head: Bounding Box & Class Prediction]
+    end
+
+    subgraph Post-Processing & Output
+        F --> G[Non-Maximum Suppression NMS]
+        G --> H[Confidence Thresholding]
+        H --> I[Bounding Box Overlay]
+        I --> J((Real-Time Alert / UI))
+    end
+
+    style A fill:#312e81,stroke:#818cf8,stroke-width:2px,color:#fff
+    style F fill:#4338ca,stroke:#818cf8,stroke-width:2px,color:#fff
+    style J fill:#166534,stroke:#4ade80,stroke-width:2px,color:#fff
 ```
 
-1. **Input:** Video stream from a dashboard camera or pre-recorded video.
-2. **Preprocessing:** Frames are extracted, resized, and normalized to match the YOLO model's input requirements.
-3. **Inference:** The YOLO model processes the frame, extracting features and predicting bounding boxes for potential potholes.
-4. **Post-Processing:** Non-Maximum Suppression (NMS) is applied to remove redundant overlapping bounding boxes.
-5. **Output:** The final frame is rendered with bounding boxes and confidence scores, which can trigger an alert in a smart vehicle system.
+### Pipeline Breakdown:
+1. **Data Pipeline:** Captures live video feeds (e.g., from a dashcam), extracts individual frames, and resizes them to the model's expected input resolution.
+2. **YOLO Inference:** The preprocessed frame is passed through the YOLO network, which extracts hierarchical features and predicts bounding boxes for potholes.
+3. **Post-Processing:** Applies Non-Maximum Suppression (NMS) to filter out overlapping predictions, leaving only the most confident bounding boxes.
+4. **Output:** The system overlays the bounding boxes onto the original frame and triggers an alert if a pothole is detected in the vehicle's path.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- **Real-Time Detection:** Optimized for high FPS processing suitable for live dashcam feeds.
-- **High Accuracy:** Utilizes the robust YOLO architecture for precise localization of potholes of various sizes.
-- **Lightweight:** Can be deployed on edge devices (e.g., Raspberry Pi, Jetson Nano) with optimized model weights.
-- **Easy Integration:** Simple Python API for integrating with existing ADAS or smart city monitoring software.
+- **⚡ Real-Time Processing:** Optimized for high FPS (Frames Per Second) inference, making it highly suitable for live dashcam feeds.
+- **🎯 High Precision & Recall:** Utilizes the robust YOLO architecture to minimize false positives while ensuring critical road hazards are detected.
+- **🪶 Edge-Device Ready:** Lightweight model weights allow for deployment on edge AI hardware like Raspberry Pi, NVIDIA Jetson Nano, or mobile devices.
+- **🔌 Plug-and-Play API:** Simple Python scripts for seamless integration with existing ADAS or smart city monitoring software.
+
+---
+
+## 💻 Technology Stack
+
+- **Deep Learning Framework:** PyTorch
+- **Object Detection Model:** YOLOv8 (Ultralytics)
+- **Computer Vision:** OpenCV
+- **Data Manipulation:** NumPy, Pandas
+- **Visualization:** Matplotlib, Seaborn
 
 ---
 
 ## 🛠️ Prerequisites
 
-Ensure you have the following installed on your system:
-- Python 3.8 or higher
-- Git
-- A CUDA-compatible GPU (Highly recommended for real-time inference)
+Ensure your development environment meets the following requirements:
+- **OS:** Linux (Ubuntu 20.04+), Windows 10/11, or macOS
+- **Python:** Version 3.8 or higher
+- **Hardware:** A CUDA-compatible NVIDIA GPU is highly recommended for real-time inference (e.g., GTX 1660 or better).
 
 ---
 
@@ -92,87 +112,119 @@ Ensure you have the following installed on your system:
    cd Real_time_pothole_detection_using_YOLO
    ```
 
-2. **Create a virtual environment (Optional but recommended):**
+2. **Create and activate a virtual environment (Recommended):**
    ```bash
+   # On Linux/macOS
+   python3 -m venv venv
+   source venv/bin/activate
+
+   # On Windows
    python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   venv\Scripts\activate
    ```
 
 3. **Install the required dependencies:**
    ```bash
+   pip install --upgrade pip
    pip install -r requirements.txt
    ```
 
 ---
 
-## 💻 Usage
+## 🎮 Usage Guide
 
-### Running Inference on a Video
-To run the detection model on a sample video file:
-
-```bash
-python detect.py --source path/to/your/video.mp4 --weights best.pt --conf 0.5
-```
-
-### Running Inference on a Live Camera Feed
-To use your webcam or a connected dashcam:
+### 1. Running Inference on a Pre-Recorded Video
+To test the detection model on a sample video file:
 
 ```bash
-python detect.py --source 0 --weights best.pt --conf 0.5
+python detect.py --source path/to/your/test_video.mp4 --weights runs/train/weights/best.pt --conf 0.5
 ```
 
-**Arguments:**
-- `--source`: Path to the video file or `0` for webcam.
-- `--weights`: Path to the trained YOLO weights file (`best.pt`).
+### 2. Running Inference on a Live Camera Feed
+To use your webcam or a connected USB dashcam:
+
+```bash
+python detect.py --source 0 --weights runs/train/weights/best.pt --conf 0.5
+```
+
+**CLI Arguments:**
+- `--source`: Path to the video file, image, or `0` for the default webcam.
+- `--weights`: Path to the trained YOLO weights file (e.g., `best.pt`).
 - `--conf`: Confidence threshold for detections (default is `0.5`).
+- `--save`: Add this flag to save the output video with bounding boxes.
 
 ---
 
-## 📊 Dataset & Training
+## 📂 Project Structure
 
-The model was trained on a custom dataset of road images containing potholes under various lighting and weather conditions. 
+```text
+Real_time_pothole_detection_using_YOLO/
+│
+├── datasets/                 # Training and validation image datasets
+├── runs/                     # Model training logs and saved weights
+│   └── train/
+│       └── weights/
+│           ├── best.pt       # Best performing model weights
+│           └── last.pt       # Last epoch weights
+│
+├── detect.py                 # Script for running inference
+├── train.py                  # Script for training the YOLO model
+├── data.yaml                 # Dataset configuration file
+├── requirements.txt          # Python dependencies
+└── README.md                 # Project documentation
+```
 
-To train the model from scratch on your own dataset:
-1. Organize your dataset in the YOLO format (images and `.txt` label files).
+---
+
+## 📊 Model Training & Evaluation
+
+### Custom Training
+The model was trained on a custom dataset of road images containing potholes under various lighting and weather conditions. To train the model from scratch on your own dataset:
+
+1. Organize your dataset in the standard YOLO format (images and corresponding `.txt` label files).
 2. Update the `data.yaml` file with your dataset paths and class names.
-3. Run the training script:
+3. Execute the training script:
    ```bash
-   yolo task=detect mode=train model=yolov8n.pt data=data.yaml epochs=100 imgsz=640
+   yolo task=detect mode=train model=yolov8n.pt data=data.yaml epochs=100 imgsz=640 batch=16 device=0
    ```
 
----
-
-## 📈 Results
-
-The model achieves high precision and recall, effectively minimizing false positives while ensuring that critical road hazards are not missed. 
-
-*(Add screenshots or GIFs of your model detecting potholes here)*
-> `<img src="path/to/demo.gif" width="600" alt="Pothole Detection Demo">`
+### Performance Metrics
+*(Note: Replace with your actual metrics)*
+- **mAP@0.5:** ~0.89
+- **Precision:** ~0.85
+- **Recall:** ~0.82
+- **Inference Speed:** ~12ms per frame on NVIDIA RTX 3060
 
 ---
 
-## 🔮 Future Scope
+## 🔮 Future Roadmap
 
-- **Night Vision & Bad Weather:** Improve detection accuracy during night time, heavy rain, or fog using thermal imaging or enhanced datasets.
-- **Severity Estimation:** Classify potholes based on depth and severity to prioritize road maintenance.
-- **Mobile Application:** Develop an Android/iOS app to crowd-source pothole locations using smartphone cameras.
+- [ ] **Night Vision & Adverse Weather:** Improve detection accuracy during night time, heavy rain, or fog using thermal imaging or enhanced augmented datasets.
+- [ ] **Severity Estimation:** Implement depth estimation to classify potholes based on severity (Low, Medium, High) to prioritize road maintenance.
+- [ ] **Mobile Application:** Develop an Android/iOS app to crowd-source pothole locations using smartphone cameras and GPS tagging.
+- [ ] **Web Dashboard:** Build a React-based dashboard for city planners to view a heatmap of detected potholes.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you have ideas for improvements or find any bugs, please follow these steps:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+This project is distributed under the MIT License. See the `LICENSE` file for more information.
 
 ---
-*If you find this project useful, please consider giving it a ⭐ on GitHub!*
+<div align="center">
+  <b>If you find this project useful, please consider giving it a ⭐ on GitHub!</b><br>
+  Made with ❤️ by <a href="https://github.com/Rupeshbhardwaj002">Rupesh Bhardwaj</a>
+</div>
+
